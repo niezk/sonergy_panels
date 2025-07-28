@@ -11,11 +11,11 @@
           <h3 class="text-xl">Add Data</h3>
           <p class="text-sm text-extralight text-gray-400">Choose your data(s)</p>
         </div>
-        <Charts ref="chart" :series="series" :options="chartOptions" />
+        <Charts ref="chart" :series="series" :options="chartOptions" height="400px" class="ml-12 lg:m-0" />
         <div>
-          <div v-if="series.length > 0">
+          <div v-if="series.length > 0" class="scale-90">
             <!-- Query Switch Buttons -->
-            <div class="flex justify-center gap-4 mb-6">
+            <div class="flex justify-center gap-4 mb-6 -mt-24 lg:mt-0">
               <button
                 @click="selectedQueryIndex = 0"
                 :class="[
@@ -25,7 +25,7 @@
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300',
                 ]"
               >
-                bill (Rupiah)
+                Bill (Rupiah)
               </button>
               <button
                 @click="selectedQueryIndex = 1"
@@ -36,7 +36,7 @@
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300',
                 ]"
               >
-                Consume
+                Consume (kWh)
               </button>
               <button
                 @click="selectedQueryIndex = 2"
