@@ -27,7 +27,7 @@
             <ConsumePanel
               class="mb-4 md:mb-0 w-10/12 lg:w-auto"
               type-cosume="annual"
-              :value-consume="3000"
+              :value-consume="3405"
               :value-raise="1.2"
               :type-raise="true"
             />

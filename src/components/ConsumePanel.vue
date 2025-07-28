@@ -6,7 +6,7 @@
   >
     <h1 class="font-extralight">{{ typeCosume.toLocaleLowerCase() }}'s consume</h1>
     <div class="flex justify-between py-2 items-start font-light">
-      <h3 class="text-4xl my-auto font-sans ">
+      <h3 class="text-3xl my-auto font-sans ">
         {{ valueConsume }}<span class="text-sm font-normal"> kWh</span>
       </h3>
       <div class="flex items-center md:pl-8">
