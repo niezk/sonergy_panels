@@ -10,7 +10,7 @@ export default {
 </script>
 
 <template>
-  <header class="sticky top-0 backdrop-blur-2xl z-20">
+  <header class="sticky top-0 backdrop-blur-2xl z-20 w-full">
     <WeatherGreetings1 />
   </header>
   <RouterView />
