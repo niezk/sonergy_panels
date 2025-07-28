@@ -1,7 +1,7 @@
 <template>
   <h1>Data Versus</h1>
   <div class="w-full h-screen">
-    <p>copmare data panel</p>
+    <p>compare data panel</p>
     <div class="flex">
       <div class="flex-1 p-2 items-center">
         <div
@@ -11,11 +11,11 @@
           <h3 class="text-xl">Add Data</h3>
           <p class="text-sm text-extralight text-gray-400">Choose your data(s)</p>
         </div>
-        <Charts ref="chart" :series="series" :options="chartOptions" height="400px" class="ml-12 lg:m-0" />
+        <Charts ref="chart" :series="series" :options="configChart" height="400px" class="ml-7 lg:m-0" />
         <div>
           <div v-if="series.length > 0" class="scale-90">
             <!-- Query Switch Buttons -->
-            <div class="flex justify-center gap-4 mb-6 -mt-24 lg:mt-0">
+            <div class="flex justify-center gap-4 mb-6 lg:mt-0">
               <button
                 @click="selectedQueryIndex = 0"
                 :class="[
@@ -55,7 +55,7 @@
             <div class="flex justify-center">
               <h1
                 v-for="(item, index) in series"
-                :key="index"
+                :key="`series-${index}-${item.name}`"
                 class="mb-4 rounded-lg"
                 :style="{ color: compareID[index]?.color || '#000' }"
               >
@@ -80,22 +80,23 @@
           <div
             class="border border-dashed p-3 rounded-xl my-3 relative"
             v-for="(item, index) in compareID"
-            :key="index"
+            :key="`compare-${index}`"
           >
-            <!-- Remove button -->
-
-            <div class="flex justify-between mb-1 lg:mb-3 ">
+            <!-- Name input with proper two-way binding -->
+            <div class="flex justify-between mb-1 lg:mb-3">
               <input
-                class="text-lg mb-3 border-b-1"
+                class="text-lg mb-3 border-b-2 border-gray-300 focus:border-blue-500 outline-none bg-transparent flex-1 mr-2"
                 type="text"
-                placeholder="Series ID"
-                :value="item.name"
+                placeholder="Series Name"
+                v-model="item.name"
                 :style="{ color: item.color }"
+                @input="onNameChange(index, $event)"
               />
               <input
                 type="color"
                 v-model="item.color"
                 class="rounded-full border-none bg-transparent appearance-none w-[20px] h-[20px]"
+                @change="onColorChange(index, $event)"
               />
             </div>
             <div class="flex items-center justify-center ml-6">
@@ -109,9 +110,9 @@
               >
                 {{ diffDays(item.dateStart, item.dateEnd) }} day(s)
               </p>
-              <p v-else class="text-red-500 text-sm px-3 py-1">invalid range {{ item.dateEnd }}</p>
+              <p v-else class="text-red-500 text-sm px-3 py-1">invalid range</p>
               <button
-                v-if="compareID.length > 0"
+                v-if="compareID.length > 1"
                 @click="removeSeries(index)"
                 class="rounded-full px-3 font-light cursor-pointer bg-red-400 hover:bg-red-600 text-white text-sm"
                 title="Remove series"
@@ -146,10 +147,10 @@
           </svg>
         </button>
         <button
-          class="rounded-lg bg-green-500 text-white px-3 py-1 cursor-pointer"
+          class="rounded-lg bg-green-500 text-white px-3 py-1 cursor-pointer hover:bg-green-600 transition-colors"
           @click="confirmSeries"
         >
-          confirm
+          Confirm
         </button>
       </div>
     </div>
@@ -230,12 +231,12 @@ export default defineComponent({
       showModal: false as boolean,
       showAlert: false as boolean,
       alertMessage: '' as string,
-      alertTimeout: null as number | null, // Changed from NodeJS.Timeout to number
+      alertTimeout: null as number | null,
       usageInput: '' as string,
       selectedQueryIndex: 0 as number,
       compareID: [
         {
-          name: 'Change Me!',
+          name: 'Series 1',
           color: '#0000ff',
           dateStart: '',
           dateEnd: '',
@@ -256,7 +257,7 @@ export default defineComponent({
           },
         },
         noData: {
-          text: 'No data provide',
+          text: 'No data provided',
         },
         colors: [] as string[],
         xaxis: {
@@ -282,7 +283,7 @@ export default defineComponent({
           },
         },
         noData: {
-          text: 'No data provide',
+          text: 'No data provided',
         },
         colors: this.colorCollection,
         xaxis: {
@@ -299,20 +300,52 @@ export default defineComponent({
     inputOpen(): void {
       this.showModal = true
     },
+
+    // New method to handle name changes
+    onNameChange(index: number, event: Event): void {
+      const target = event.target as HTMLInputElement
+      if (this.compareID[index]) {
+        this.compareID[index].name = target.value
+        // Update the series name if it exists
+        if (this.series[index]) {
+          this.series[index].name = target.value
+        }
+      }
+    },
+
+    // New method to handle color changes
+    onColorChange(index: number, event: Event): void {
+      const target = event.target as HTMLInputElement
+      if (this.compareID[index]) {
+        this.compareID[index].color = target.value
+        // Force chart update with new colors
+        this.updateChartColors()
+      }
+    },
+
+    // Method to update chart colors dynamically
+    updateChartColors(): void {
+      const chartElement = this.$refs.chart as any
+      if (chartElement && typeof chartElement.updateOptions === 'function') {
+        chartElement.updateOptions({
+          colors: this.colorCollection,
+        })
+      }
+    },
+
     showModalAlert(message: string, duration: number = 5000): void {
       this.alertMessage = message
       this.showAlert = true
 
-      // Clear any existing timeout
       if (this.alertTimeout) {
         clearTimeout(this.alertTimeout)
       }
 
-      // Auto-hide after duration - using window.setTimeout
       this.alertTimeout = window.setTimeout(() => {
         this.showAlert = false
       }, duration)
     },
+
     closeAlert(): void {
       this.showAlert = false
       if (this.alertTimeout) {
@@ -320,30 +353,29 @@ export default defineComponent({
         this.alertTimeout = null
       }
     },
+
     formatCustomNumber(num: number): string {
       const [intPart] = num.toString().split('.')
       const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
       return `${grouped}`
     },
+
     async confirmSeries(): Promise<void> {
       const dataCompare: SeriesItem[] = []
-      // Fixed type assertion
       const chartElement = this.$refs.chart as any
 
       for (const item of this.compareID) {
-        // Skip invalid date ranges
         if (this.convertUnix(item.dateStart) > this.convertUnix(item.dateEnd)) {
           continue
         }
 
         const data = await this.queryFilterData(item.dateStart, item.dateEnd)
         dataCompare.push({
-          name: item.name,
+          name: item.name, // This will now use the updated name from the input
           data: data,
         })
       }
 
-      // If nothing valid, show modal alert instead of browser alert
       if (dataCompare.length === 0) {
         this.showModalAlert('No valid date ranges found in the series.')
         return
@@ -360,6 +392,7 @@ export default defineComponent({
       this.showModal = false
       this.series = dataCompare
     },
+
     addNewSeries(): void {
       let color = '#00bbff'
       do {
@@ -371,29 +404,39 @@ export default defineComponent({
       } while (this.compareID.some((item: CompareItem) => item.color === color))
 
       const newSeries: CompareItem = {
-        name: 'Change Me!',
+        name: `Series ${this.compareID.length + 1}`,
         color: color,
         dateStart: '',
         dateEnd: '',
       }
+
       if (this.compareID.length < 4) {
         this.compareID.push(newSeries)
       } else {
         this.showModalAlert('Maximum series achieved (max: 4)')
       }
     },
+
     removeSeries(index: number): void {
-      if (this.compareID.length > 0) {
+      if (this.compareID.length > 1) {
         this.compareID.splice(index, 1)
+        // Also remove from series if it exists
+        if (this.series[index]) {
+          this.series.splice(index, 1)
+        }
+        this.updateChartColors()
       }
     },
+
     convertUnix(date: string): number {
       return new Date(date).getTime()
     },
+
     diffDays(start: string, end: string): number | string {
       const firstDate = this.convertUnix(start)
       const lastDate = this.convertUnix(end)
       const diff = Math.round(Math.abs((firstDate - lastDate) / 86400000))
+
       if (firstDate <= lastDate) {
         if (!Number.isNaN(diff)) {
           return diff
@@ -404,6 +447,7 @@ export default defineComponent({
         return 'invalid range'
       }
     },
+
     async queryFilterData(start: string, end: string): Promise<(string | number)[]> {
       let bill = 0
       let voltage = 0
@@ -419,7 +463,7 @@ export default defineComponent({
       )
       const querySnapshot = await getDocs(q)
       querySnapshot.forEach((doc) => {
-        const data: DocumentData = doc.data() // DocumentData is now imported
+        const data: DocumentData = doc.data()
         bill += data.bill
         consume += data.consume
         if (voltage < data.voltage) {
@@ -428,10 +472,12 @@ export default defineComponent({
       })
       return [bill, consume, voltage]
     },
+
     getQueryLabel(index: number): string {
       const labels = ['bill (Rupiah)', 'Consume', 'Highest voltage']
       return labels[index]
     },
+
     formatValue(value: string | number): string {
       if (typeof value === 'number') {
         return value.toLocaleString()
@@ -439,8 +485,8 @@ export default defineComponent({
       return String(value)
     },
   },
+
   beforeUnmount() {
-    // Clean up timeout when component is destroyed
     if (this.alertTimeout) {
       clearTimeout(this.alertTimeout)
     }
