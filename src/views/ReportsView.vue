@@ -4,12 +4,10 @@ import RankingData from '@/components/RankingData.vue'
 </script>
 
 <template>
-  <main class="mx-auto mt-6 px-12 md:w-10/12">
+  <main class="w-[500px] mt-6 md:w-10/12 md:mx-auto overflow-hidden mx-auto">
     <section>
       <RankingData />
-      <!-- <div class="w-fit hidden"> -->
-      <FilterData />
-      <!-- </div> -->
+      <FilterData class="px-16 md:px-0" />
     </section>
   </main>
 </template>

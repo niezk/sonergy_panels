@@ -1,5 +1,5 @@
 <template>
-  <main class="mt-2">
+  <main class="mt-2 overflow-hidden">
     <!-- Mobile & Desktop Container -->
     <div class="mx-4 md:mx-8 lg:mx-auto lg:max-w-7xl">
       <section>

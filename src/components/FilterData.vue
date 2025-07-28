@@ -95,11 +95,11 @@
               <div class="grid grid-cols-2 gap-3">
                 <div class="bg-amber-100 p-3 rounded-lg">
                   <div class="text-amber-600 font-medium">voltage</div>
-                  <div class="text-lg font-semibold">{{ item.voltage }}°C</div>
+                  <div class="text-lg font-semibold">{{ item.voltage }} Volt</div>
                 </div>
                 <div class="bg-fuchsia-100 p-3 rounded-lg">
                   <div class="text-fuchsia-600 font-medium">Consume</div>
-                  <div class="text-lg font-semibold">{{ item.consume }} kWh</div>
+                  <div class="text-lg font-semibold">{{ item.consume }} <span></span>kWh</div>
                 </div>
               </div>
               <div class="bg-emerald-100 p-3 rounded-lg w-full">
