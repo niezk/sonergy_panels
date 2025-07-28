@@ -181,7 +181,7 @@
 
 <script lang="ts">
 import VueApexCharts from 'vue3-apexcharts'
-import { query, collection, where, getDocs, limit } from 'firebase/firestore'
+import { query, collection, where, getDocs, limit, type DocumentData } from 'firebase/firestore'
 import db from '@/assets/firebase-config'
 import { defineComponent } from 'vue'
 
@@ -221,11 +221,6 @@ interface ChartOptions {
   }
 }
 
-// interface DataMockItem {
-//   time: number
-//   bill: number
-// }
-
 export default defineComponent({
   components: {
     Charts: VueApexCharts,
@@ -235,7 +230,7 @@ export default defineComponent({
       showModal: false as boolean,
       showAlert: false as boolean,
       alertMessage: '' as string,
-      alertTimeout: null as NodeJS.Timeout | null,
+      alertTimeout: null as number | null, // Changed from NodeJS.Timeout to number
       usageInput: '' as string,
       selectedQueryIndex: 0 as number,
       compareID: [
@@ -313,8 +308,8 @@ export default defineComponent({
         clearTimeout(this.alertTimeout)
       }
 
-      // Auto-hide after duration
-      this.alertTimeout = setTimeout(() => {
+      // Auto-hide after duration - using window.setTimeout
+      this.alertTimeout = window.setTimeout(() => {
         this.showAlert = false
       }, duration)
     },
@@ -332,7 +327,8 @@ export default defineComponent({
     },
     async confirmSeries(): Promise<void> {
       const dataCompare: SeriesItem[] = []
-      const chartElement = this.$refs.chart as InstanceType<typeof VueApexCharts>
+      // Fixed type assertion
+      const chartElement = this.$refs.chart as any
 
       for (const item of this.compareID) {
         // Skip invalid date ranges
@@ -423,7 +419,7 @@ export default defineComponent({
       )
       const querySnapshot = await getDocs(q)
       querySnapshot.forEach((doc) => {
-        const data: DocumentData = doc.data()
+        const data: DocumentData = doc.data() // DocumentData is now imported
         bill += data.bill
         consume += data.consume
         if (voltage < data.voltage) {

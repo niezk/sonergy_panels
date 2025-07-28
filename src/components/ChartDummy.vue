@@ -42,7 +42,6 @@ interface DataReport {
   consume: number
 }
 
-
 export default {
   components: {
     Charts: VueApexCharts,
@@ -57,18 +56,34 @@ export default {
   },
   computed: {
     series() {
+      // Convert object format to ApexCharts array format [timestamp, value]
+      const panelsData = this.data_panels.map(item => [
+        new Date(item.time).getTime(),
+        item.consume
+      ])
+
+      const forecastData = this.data_forecast.map(item => [
+        new Date(item.time).getTime(),
+        item.consume
+      ])
+
       return [
         {
           name: 'Consumption',
-          data: this.data_panels,
+          data: panelsData,
         },
         {
           name: 'Forecasting',
-          data: this.data_forecast,
+          data: forecastData,
         },
       ]
     },
     configChart() {
+      const panelsData = this.data_panels.map(item => [
+        new Date(item.time).getTime(),
+        item.consume
+      ])
+
       return {
         chart: {
           type: 'area',
@@ -83,8 +98,8 @@ export default {
           },
           selection: {
             xaxis: {
-              min: this.data_panels[100] ? this.data_panels[100][0] : this.data_panels[0][0],
-              max: this.data_panels[this.data_panels.length - 1][0],
+              min: panelsData[100] ? panelsData[100][0] : panelsData[0]?.[0],
+              max: panelsData[panelsData.length - 1]?.[0],
             },
             enabled: true,
             stroke: {
@@ -153,38 +168,50 @@ export default {
       // Only proceed if chart exists and data is loaded
       if (!this.$refs.chart || this.data_panels.length === 0) return
 
-      const chartElement = this.$refs.chart as InstanceType<typeof ApexCharts>
+      const chartElement = this.$refs.chart as any
+
+      // Convert data to ApexCharts format for zoom operations
+      const panelsData = this.data_panels.map(item => [
+        new Date(item.time).getTime(),
+        item.consume
+      ])
 
       switch (timeline) {
-        case 'a day': // Updated to match your button text
-          chartElement.zoomX(
-            this.data_panels[this.data_panels.length - 2][0],
-            this.data_panels[this.data_panels.length - 1][0],
-          )
+        case 'a day':
+          if (panelsData.length >= 2) {
+            chartElement.zoomX(
+              panelsData[panelsData.length - 2][0],
+              panelsData[panelsData.length - 1][0],
+            )
+          }
           break
         case '30 days':
-          const startIndex = Math.max(0, this.data_panels.length - 31)
-          chartElement.zoomX(
-            this.data_panels[startIndex][0],
-            this.data_panels[this.data_panels.length - 1][0],
-          )
+          const startIndex = Math.max(0, panelsData.length - 31)
+          if (panelsData.length > 0) {
+            chartElement.zoomX(
+              panelsData[startIndex][0],
+              panelsData[panelsData.length - 1][0],
+            )
+          }
           break
         case 'all times':
-          chartElement.zoomX(
-            this.series[0][0],
-            this.series[1][0],
-          )
-          chartElement.updateOptions({
-            chart: {
-              selection: {
-                enabled: true,
-                xaxis: {
-                  min: this.data_panels[Math.max(0, this.data_panels.length - 200)][0],
-                  max: this.data_panels[this.data_panels.length - 1][0],
+          if (this.series.length >= 2 && this.series[0].data.length > 0 && this.series[1].data.length > 0) {
+            chartElement.zoomX(
+              this.series[0].data[0][0],
+              this.series[0].data[this.series[0].data.length - 1][0],
+            )
+            chartElement.updateOptions({
+              chart: {
+                selection: {
+                  enabled: true,
+                  xaxis: {
+                    min: panelsData[Math.max(0, panelsData.length - 200)]?.[0],
+                    max: panelsData[panelsData.length - 1]?.[0],
+                  },
                 },
               },
-            },
-          })
+            })
+          }
           break
         default:
       }
