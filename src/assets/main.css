@@ -1,0 +1,17 @@
+@import './base.css';
+@import 'tailwindcss';
+
+
+hr {
+  box-shadow: -1px 15px 29px 1px rgba(0, 0, 0, 0.9);
+  -webkit-box-shadow: -1px 15px 29px 1px rgba(0, 0, 0, 0.9);
+  -moz-box-shadow: -1px 15px 29px 1px rgba(0, 0, 0, 0.9);
+}
+
+body {
+  /* height: 200vh; */
+}
+
+main {
+  height: fit-content;
+}
