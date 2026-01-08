@@ -2,6 +2,8 @@
 
 This template should help get you started developing with Vue 3 in Vite. Running Sonergy Panels locally
 
+or Visit this [demo *depracated](https://sonergy-panels.vercel.app/)
+
 ## Brief Project
 Sonergy Brief Project Explaination and goals [Sonergy Brief](s.id/sonergy_brief)
 
