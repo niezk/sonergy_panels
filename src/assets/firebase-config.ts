@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebase_key_local={
-  apiKey: "AIzaSyDw7RlRTfWhBgepVFsZdkOLBculX66S2q8",
+  apiKey: "xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   authDomain: "dummy-electic-consume.firebaseapp.com",
   projectId: "dummy-electic-consume",
   storageBucket: "dummy-electic-consume.firebasestorage.app",
